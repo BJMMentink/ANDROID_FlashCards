@@ -31,6 +31,11 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             R.drawable.minnesota,
             R.drawable.ohio,
     };
+    int[] textfiles = {
+            R.raw.wisconsin,
+            R.raw.minnesota,
+            R.raw.ohio,
+    };
     int cardNo = 0;
     boolean isFront = true;
     ImageView imgCard;
@@ -51,24 +56,42 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         Log.d(TAG, "onCreate: Complete");
     }
     private void updateToNextCard(){
+        states[cardNo].setCapital(readFile(textfiles[cardNo]));
         isFront = true;
         imgCard.setVisibility(View.VISIBLE);
         imgCard.setImageResource(imgs[cardNo]);
         tvCard.setText(states[cardNo].getName());
     }
 
-   /* private String readFile(int fileId){
+    private String readFile(int fileId){
         InputStream inputStream;
         InputStreamReader inputStreamReader;
         BufferedReader bufferedReader;
         StringBuffer stringBuffer;
         try {
+            inputStream = getResources().openRawResource(fileId);
+            inputStreamReader = new InputStreamReader(inputStream);
+            bufferedReader = new BufferedReader(inputStreamReader);
+            stringBuffer = new StringBuffer();
 
+            String data;
+
+          while((data = bufferedReader.readLine()) != null){
+              stringBuffer.append(data).append("\n");
+
+          }
+          // cleanup objects
+          bufferedReader.close();
+          inputStreamReader.close();
+          inputStream.close();
+          Log.d(TAG, "readFile: " + stringBuffer.toString());
+          return stringBuffer.toString();
         }catch (Exception ex){
             Log.d(TAG, "readFile: " + ex.getMessage());
             ex.printStackTrace();
+            return ex.getMessage();
         }
-    }*/
+    }
 
 //ONE OF THOSE THINGS THAT MUST BE REMEMBERED
     @Override
