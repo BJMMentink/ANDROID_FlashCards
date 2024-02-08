@@ -9,8 +9,14 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity implements GestureDetector.OnGestureListener {
 
@@ -25,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             R.drawable.minnesota,
             R.drawable.ohio,
     };
-    int cardNo = 2;
+    int cardNo = 0;
     boolean isFront = true;
     ImageView imgCard;
     TextView tvCard;
@@ -38,14 +44,32 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         setContentView(R.layout.activity_main);
         imgCard = findViewById(R.id.imageView);
         tvCard = findViewById(R.id.tvInfo);
+        updateToNextCard();
 
-        imgCard.setVisibility(View.VISIBLE);
-        imgCard.setImageResource(imgs[cardNo]);
-        tvCard.setText(states[cardNo].getName());
         
         gestureDetector = new GestureDetector(this, this);
         Log.d(TAG, "onCreate: Complete");
     }
+    private void updateToNextCard(){
+        isFront = true;
+        imgCard.setVisibility(View.VISIBLE);
+        imgCard.setImageResource(imgs[cardNo]);
+        tvCard.setText(states[cardNo].getName());
+    }
+
+   /* private String readFile(int fileId){
+        InputStream inputStream;
+        InputStreamReader inputStreamReader;
+        BufferedReader bufferedReader;
+        StringBuffer stringBuffer;
+        try {
+
+        }catch (Exception ex){
+            Log.d(TAG, "readFile: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }*/
+
 //ONE OF THOSE THINGS THAT MUST BE REMEMBERED
     @Override
     public  boolean onTouchEvent(MotionEvent motionEvent){
@@ -103,9 +127,56 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     }
 
     @Override
-    public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
+    public boolean onFling(@Nullable MotionEvent motionEvent1, @NonNull MotionEvent motionEvent2, float velocityX, float velocityY) {
         Log.d(TAG, "onFling: ");
+
+        int numCards = states.length;
+        try {
+            int x1 = (int) (motionEvent1 != null ? motionEvent1.getX() : 0);
+            int x2 = (int)motionEvent2.getX();
+
+            if (x1<x2){
+                Animation move = AnimationUtils.loadAnimation(this, R.anim.moveright);
+                move.setAnimationListener(new AnimationListener());
+                imgCard.startAnimation(move);
+                tvCard.startAnimation(move);
+                // swipe right
+                Log.d(TAG, "onFling: Right");
+                cardNo = (cardNo - 1 + numCards) % numCards;
+
+            }else{
+                Animation move = AnimationUtils.loadAnimation(this, R.anim.moveleft);
+                move.setAnimationListener(new AnimationListener());
+                imgCard.startAnimation(move);
+                tvCard.startAnimation(move);
+                // swipe left
+                Log.d(TAG, "onFling: Left");
+                cardNo = (cardNo + 1) % numCards;
+            }
+        }catch (Exception ex){
+            Log.e(TAG, "onFling: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+
         return false;
     }
 
+    private class AnimationListener implements Animation.AnimationListener{
+
+        @Override
+        public void onAnimationStart(Animation animation) {
+            
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+            updateToNextCard();
+            Log.d(TAG, "onAnimationEnd: ");
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+
+        }
+    }
 }
